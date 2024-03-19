@@ -1,154 +1,215 @@
+function App() {
+  const { Fragment, useState } = React;
+  const [query, setQuery] = useState("Pasta");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10); // Initialize pageSize state here
+  const [{ data, isLoading, isError }, doFetch] = useDataApi(
+    "https://hn.algolia.com/api/v1/search?query=Pasta",
+    { hits: [] }
+  );
+
+  const handlePageChange = (e) => {
+    setCurrentPage(Number(e.target.textContent));
+  };
+
+  const handlePageSizeChange = (e) => {
+    setPageSize(Number(e.target.value));
+  };
+
+  let page = data.hits;
+  if (page.length >= 1) {
+    page = paginate(page, currentPage, pageSize);
+  }
+
+  return (
+    <Fragment>
+      {/* Existing code for displaying items */}
+      <input 
+        type="number"
+        value={pageSize}
+        onChange={handlePageSizeChange}
+        placeholder="Enter # of links on page"
+        id="num"
+      />
+      <Pagination
+        items={data.hits}
+        pageSize={pageSize}
+        onPageChange={handlePageChange}
+      />
+    </Fragment>
+  );
+}
+
 const Pagination = ({ items, pageSize, onPageChange }) => {
   const { Button } = ReactBootstrap;
   if (items.length <= 1) return null;
-  
-  let num = document.getElementById("num");
-  let pages = range(1, num + 1);
-  const list = pages.map(page => {
-    return (
-      <Button key={page} onClick={onPageChange} className="page-item">
-        {page}
-      </Button>
-    );
-  });
+
+  let pages = range(1, Math.ceil(items.length / pageSize));
+  const list = pages.map(page => (
+    <Button key={page} onClick={onPageChange} className="page-item">
+      {page}
+    </Button>
+  ));
+
   return (
     <nav>
       <ul className="pagination">{list}</ul>
     </nav>
   );
 };
-const range = (start, end) => {
-  return Array(end - start + 1)
-    .fill(0)
-    .map((item, i) => start + i);
-};
-function paginate(items, pageNumber, pageSize) {
-  const start = (pageNumber - 1) * pageSize;
-  let page = items.slice(start, start + pageSize);
-  return page;
-}
-const useDataApi = (initialUrl, initialData) => {
-  const { useState, useEffect, useReducer } = React;
-  const [url, setUrl] = useState(initialUrl);
 
-  const [state, dispatch] = useReducer(dataFetchReducer, {
-    isLoading: false,
-    isError: false,
-    data: initialData
-  });
+// tttttt
+// const Pagination = ({ items, pageSize, onPageChange }) => {
+//   const { Button } = ReactBootstrap;
+//   if (items.length <= 1) return null;
+  
+//   let num = document.getElementById("num");
+//   let pages = range(1, num + 1);
+//   const list = pages.map(page => {
+//     return (
+//       <Button key={page} onClick={onPageChange} className="page-item">
+//         {page}
+//       </Button>
+//     );
+//   });
+//   return (
+//     <nav>
+//       <ul className="pagination">{list}</ul>
+//     </nav>
+//   );
+// };
+// const range = (start, end) => {
+//   return Array(end - start + 1)
+//     .fill(0)
+//     .map((item, i) => start + i);
+// };
+// function paginate(items, pageNumber, pageSize) {
+//   const start = (pageNumber - 1) * pageSize;
+//   let page = items.slice(start, start + pageSize);
+//   return page;
+// }
+// const useDataApi = (initialUrl, initialData) => {
+//   const { useState, useEffect, useReducer } = React;
+//   const [url, setUrl] = useState(initialUrl);
 
-  useEffect(() => {
-    let didCancel = false;
-    const fetchData = async () => {
-      dispatch({ type: "FETCH_INIT" });
-      try {
-        const result = await axios(url);
-        if (!didCancel) {
-          dispatch({ type: "FETCH_SUCCESS", payload: result.data });
-        }
-      } catch (error) {
-        if (!didCancel) {
-          dispatch({ type: "FETCH_FAILURE" });
-        }
-      }
-    };
-    fetchData();
-    return () => {
-      didCancel = true;
-    };
-  }, [url]);
-  return [state, setUrl];
-};
-const dataFetchReducer = (state, action) => {
-  switch (action.type) {
-    case "FETCH_INIT":
-      return {
-        ...state,
-        isLoading: true,
-        isError: false
-      };
-    case "FETCH_SUCCESS":
-      return {
-        ...state,
-        isLoading: false,
-        isError: false,
-        data: action.payload
-      };
-    case "FETCH_FAILURE":
-      return {
-        ...state,
-        isLoading: false,
-        isError: true
-      };
-    default:
-      throw new Error();
-  }
-};
-// App that gets data from Hacker News url
-function App() {
-  const { Fragment, useState, useEffect, useReducer } = React;
-  const [query, setQuery] = useState("Pasta");
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
-  const [{ data, isLoading, isError }, doFetch] = useDataApi(
-    "https://hn.algolia.com/api/v1/search?query=Pasta",
-    {
-      hits: []
-    }
-  );
-  const handlePageChange = e => {
-    setCurrentPage(Number(e.target.textContent));
-  };
-  let page = data.hits;
-  if (page.length >= 1) {
-    page = paginate(page, currentPage, pageSize);
-    console.log(`currentPage: ${currentPage}`);
-  }
-  return (
-    <Fragment>
-      {/* <form
-        onSubmit={event => {
-          doFetch("https://hn.algolia.com/api/v1/search?query=${query}");
-          event.preventDefault();
-        }}
-      >
-        <input
-          type="text"
-          value={query}
-          onChange={event => setQuery(event.target.value)}
-        />
-        <button type="submit">Search</button>
-      </form> */}
+//   const [state, dispatch] = useReducer(dataFetchReducer, {
+//     isLoading: false,
+//     isError: false,
+//     data: initialData
+//   });
 
-      {isError && <div>Something went wrong ...</div>}
+//   useEffect(() => {
+//     let didCancel = false;
+//     const fetchData = async () => {
+//       dispatch({ type: "FETCH_INIT" });
+//       try {
+//         const result = await axios(url);
+//         if (!didCancel) {
+//           dispatch({ type: "FETCH_SUCCESS", payload: result.data });
+//         }
+//       } catch (error) {
+//         if (!didCancel) {
+//           dispatch({ type: "FETCH_FAILURE" });
+//         }
+//       }
+//     };
+//     fetchData();
+//     return () => {
+//       didCancel = true;
+//     };
+//   }, [url]);
+//   return [state, setUrl];
+// };
+// const dataFetchReducer = (state, action) => {
+//   switch (action.type) {
+//     case "FETCH_INIT":
+//       return {
+//         ...state,
+//         isLoading: true,
+//         isError: false
+//       };
+//     case "FETCH_SUCCESS":
+//       return {
+//         ...state,
+//         isLoading: false,
+//         isError: false,
+//         data: action.payload
+//       };
+//     case "FETCH_FAILURE":
+//       return {
+//         ...state,
+//         isLoading: false,
+//         isError: true
+//       };
+//     default:
+//       throw new Error();
+//   }
+// };
+// // App that gets data from Hacker News url
+// function App() {
+//   const { Fragment, useState, useEffect, useReducer } = React;
+//   const [query, setQuery] = useState("Pasta");
+//   const [currentPage, setCurrentPage] = useState(1);
+//   const pageSize = 10;
+//   const [{ data, isLoading, isError }, doFetch] = useDataApi(
+//     "https://hn.algolia.com/api/v1/search?query=Pasta",
+//     {
+//       hits: []
+//     }
+//   );
+//   const handlePageChange = e => {
+//     setCurrentPage(Number(e.target.textContent));
+//   };
+//   let page = data.hits;
+//   if (page.length >= 1) {
+//     page = paginate(page, currentPage, pageSize);
+//     console.log(`currentPage: ${currentPage}`);
+//   }
+//   return (
+//     <Fragment>
+//       {/* <form
+//         onSubmit={event => {
+//           doFetch("https://hn.algolia.com/api/v1/search?query=${query}");
+//           event.preventDefault();
+//         }}
+//       >
+//         <input
+//           type="text"
+//           value={query}
+//           onChange={event => setQuery(event.target.value)}
+//         />
+//         <button type="submit">Search</button>
+//       </form> */}
 
-      {isLoading ? (
-        <div>Loading ...</div>
-      ) : (
-        <ul>
-          {page.map(item => (
-            <li key={item.objectID}>
-              <a href={item.url}>{item.title}</a>
-            </li>
-          ))}
-        </ul>
-      )}
-      <Pagination
-        items={data.hits}
-        pageSize=<input 
-        type="number"
-        value={pageSize}
-        placeholder="Enter # of links on page"
-        id="num"></input>
+//       {isError && <div>Something went wrong ...</div>}
 
-        onPageChange={handlePageChange}
-      ></Pagination>
-    </Fragment>
-  );
-}
+//       {isLoading ? (
+//         <div>Loading ...</div>
+//       ) : (
+//         <ul>
+//           {page.map(item => (
+//             <li key={item.objectID}>
+//               <a href={item.url}>{item.title}</a>
+//             </li>
+//           ))}
+//         </ul>
+//       )}
+//       <Pagination
+//         items={data.hits}
+//         pageSize=<input 
+//         type="number"
+//         value={pageSize}
+//         placeholder="Enter # of links on page"
+//         id="num"></input>
 
-// ========================================
-ReactDOM.render(<App />, document.getElementById("root"));
+//         onPageChange={handlePageChange}
+//       ></Pagination>
+//     </Fragment>
+//   );
+// }
+
+// // ========================================
+// ReactDOM.render(<App />, document.getElementById("root"));
 
 // ttttt
 // const Pagination = ({ items, pageSize, onPageChange }) => {

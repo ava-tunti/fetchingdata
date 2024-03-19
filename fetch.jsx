@@ -337,7 +337,7 @@ function App() {
 
       {isError && <div>Something went wrong ...</div>}
 
-      {isLoading ? (
+{/*       {isLoading ? (
         <div>Loading ...</div>
       ) : (
         <ul>
@@ -347,7 +347,19 @@ function App() {
             </li>
           ))}
         </ul>
-      )}
+      )} */}
+      {isLoading ? (
+      <div>Loading ...</div>
+    ) : (
+      <div className="cards-container">
+        {page.map(item => (
+          <div key={item.objectID} className="card">
+            <a href={item.url} target="_blank" rel="noopener noreferrer">{item.title}</a>
+          </div>
+        ))}
+      </div>
+    )}
+
       <Pagination
         items={data.hits}
         pageSize={pageSize}

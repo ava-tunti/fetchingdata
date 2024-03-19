@@ -120,13 +120,6 @@ function App() {
         <button type="submit">Search</button>
       </form> */}
 
-      <input 
-        type="number"
-        value={pageSize}
-        placeholder="Enter # of links on page"
-        id="num"></input>
-
-
       {isError && <div>Something went wrong ...</div>}
 
       {isLoading ? (
@@ -142,7 +135,12 @@ function App() {
       )}
       <Pagination
         items={data.hits}
-        pageSize={pageSize}
+        pageSize=<input 
+        type="number"
+        value={pageSize}
+        placeholder="Enter # of links on page"
+        id="num"></input>
+
         onPageChange={handlePageChange}
       ></Pagination>
     </Fragment>
